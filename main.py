@@ -8,7 +8,7 @@ import pyautogui
 import time
 import sys
 import pyperclip
-from decision_maker import DecisionMaker, DecisionType, GameAction, GameState, RareWeaponDecisionMaker
+from decision_maker import DecisionMaker, DecisionType, GameAction, GameState, Hidden20DecisionMaker, RareWeaponDecisionMaker
 from datetime import datetime
 from pynput import mouse
 
@@ -191,7 +191,7 @@ def print_separator(char='='):
 def stop_condition() -> bool:
     """마우스 위치 확인 (x > 100이면 중지)"""
     mouse_x, mouse_y = pyautogui.position()
-    return mouse_x > 100
+    return mouse_x > 500
 
 def automation_loop(chat_log_position, input_position):
     """자동화 메인 루프"""
@@ -205,8 +205,14 @@ def automation_loop(chat_log_position, input_position):
     print_separator()
     # 초기 상태 동기화
     print("\n🔄 현재 상태 확인 중...")
-    initial_text = copy_text_from_location(chat_log_position)
-    current_action = get_latest_action(initial_text)
+    while True:
+        try:
+            initial_text = copy_text_from_location(chat_log_position)
+            current_action = get_latest_action(initial_text)
+            break
+        except Exception as e:
+            print(f"❌ 초기 상태 확인 오류: {e}")
+            time.sleep(1)
     print_separator()
     dm.update_state(current_action)
     print(f"현재 상태: {dm.get_state()}")
@@ -225,8 +231,14 @@ def automation_loop(chat_log_position, input_position):
     while not stop_condition():
         while not stop_condition():
             # 새 상태 업데이트 될 때까지 대기
-            initial_text = copy_text_from_location(chat_log_position)
-            current_action = get_latest_action(initial_text)
+            while True:
+                try:
+                    initial_text = copy_text_from_location(chat_log_position)
+                    current_action = get_latest_action(initial_text)
+                    break
+                except Exception as e:
+                    print(f"❌ 초기 상태 확인 오류: {e}")
+                    time.sleep(1)
             if dm.update_state(current_action):
                 print_separator()
                 latest_action = dm.get_latest_action()

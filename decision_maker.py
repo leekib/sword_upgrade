@@ -286,3 +286,21 @@ class AllWeapon16DecisionMaker(DecisionMaker):
             return DecisionType.STOP
         else:
             return DecisionType.ENHANCE
+
+
+class Hidden20DecisionMaker(DecisionMaker):
+    
+    def __init__(self, desc = "히든 무기를 20강 이상 달성 목표"):
+        super().__init__(desc)
+    
+    def make_decision(self) -> DecisionType:
+        if self.state.is_rare_weapon() and self.state.weapon_level < 20:
+            return DecisionType.ENHANCE
+        elif self.state.is_rare_weapon() and self.state.weapon_level == 20:
+            return DecisionType.STOP
+        elif not self.state.is_rare_weapon() and self.state.weapon_level < 1:
+            return DecisionType.ENHANCE
+        elif not self.state.is_rare_weapon() and self.state.weapon_level >= 1:
+            return DecisionType.SELL
+        else:
+            return DecisionType.ENHANCE
