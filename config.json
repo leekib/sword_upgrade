@@ -1,0 +1,27 @@
+{
+  "username": "사용자",
+  "chat_log_position": [
+    48,
+    1222
+  ],
+  "input_position": [
+    59,
+    1259
+  ],
+  "more_button_position": [
+    488,
+    55
+  ],
+  "chat_settings_position": [
+    496,
+    303
+  ],
+  "export_position": [
+    703,
+    298
+  ],
+  "delete_all_position": [
+    696,
+    368
+  ]
+}

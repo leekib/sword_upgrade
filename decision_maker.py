@@ -140,7 +140,8 @@ class GameAction:
             gold_remaining = int(gold_remaining_match.group(1).replace(',', '')) if gold_remaining_match else 0
             
             # 새로운 무기 파싱: ⚔️새로운 검 획득: [+0] 낡은 몽둥이
-            weapon_match = re.search(r'⚔️새로운 검 획득:\s*\[(\+\d+)\]\s*(.+?)(?:\n|$)', text)
+            # 정규표현식 개선: 줄바꿈이나 다른 패턴까지 매칭
+            weapon_match = re.search(r'⚔️새로운 검 획득:\s*\[(\+\d+)\]\s*(.+?)(?:\n|$|\[|💬)', text)
             if weapon_match:
                 level = int(weapon_match.group(1).replace('+', ''))
                 weapon_name = weapon_match.group(2).strip()
@@ -184,7 +185,16 @@ class GameState:
 
     
     def is_rare_weapon(self):
-        return self.start_weapon_name is not None and '낡은' not in self.start_weapon_name
+        if self.start_weapon_name is None:
+            return False
+        # '새해'가 들어가면 무조건 레어 무기
+        if '새해' in self.start_weapon_name:
+            return True
+        # '새해'가 안들어간 '낡은'은 포함된 애들은 일반 무기
+        if '낡은' in self.start_weapon_name:
+            return False
+        # 그 외는 레어 무기
+        return True
     
     def to_json(self):
         return {
@@ -289,6 +299,24 @@ class AllWeapon16DecisionMaker(DecisionMaker):
 
 
 class Hidden20DecisionMaker(DecisionMaker):
+    
+    def __init__(self, desc = "히든 무기를 20강 이상 달성 목표"):
+        super().__init__(desc)
+    
+    def make_decision(self) -> DecisionType:
+        if self.state.is_rare_weapon() and self.state.weapon_level < 20:
+            return DecisionType.ENHANCE
+        elif self.state.is_rare_weapon() and self.state.weapon_level == 20:
+            return DecisionType.STOP
+        elif not self.state.is_rare_weapon() and self.state.weapon_level < 1:
+            return DecisionType.ENHANCE
+        elif not self.state.is_rare_weapon() and self.state.weapon_level >= 1:
+            return DecisionType.SELL
+        else:
+            return DecisionType.ENHANCE
+
+
+class TestDeleteDialog(DecisionMaker):
     
     def __init__(self, desc = "히든 무기를 20강 이상 달성 목표"):
         super().__init__(desc)
